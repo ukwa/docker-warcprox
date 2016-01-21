@@ -1,7 +1,7 @@
 # The WARChiving proxy itself
 #
 warcprox:
-  build: ../warcprox
+  build: .
   volumes:
     - ./output/warcs:/output/warcs
 
@@ -9,7 +9,7 @@ warcprox:
 # 
 # Current implementation requires manual updates to squid.conf depending on the number of warcprox instances.
 warcprox-squid:
-  build: ../warcprox-squid
+  image: ukwa/warcprox-squid
   ports:
     - "3128:3128"
   links:
