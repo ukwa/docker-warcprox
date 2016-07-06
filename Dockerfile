@@ -4,7 +4,7 @@ RUN apt-get update && \
     apt-get install -y python3-dev python3-gdbm curl git libffi-dev libssl-dev && \
     curl "https://bootstrap.pypa.io/get-pip.py" | python3.4
 
-RUN pip3.4 install warcprox 
+RUN pip3.4 install warcprox==2.0.dev9
 
 EXPOSE 8000
 #EXPOSE 8800
