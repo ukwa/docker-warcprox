@@ -1,14 +1,18 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 RUN apt-get update && \
-    apt-get install -y python3-dev python3-gdbm curl git libffi-dev libssl-dev && \
-    curl "https://bootstrap.pypa.io/get-pip.py" | python3.4
+    apt-get install -y gcc make build-essential python python-dev python-gdbm curl git libffi-dev libssl-dev
 
-RUN pip3.4 install warcprox==2.0.dev9
+RUN curl "https://bootstrap.pypa.io/get-pip.py" | python
+
+RUN apt-get install strace
+
+RUN pip install warcprox==2.0b1
+#RUN pip install git+https://github.com/internetarchive/warcprox.git@2.x
 
 EXPOSE 8000
-#EXPOSE 8800
 
-#CMD warcprox -b 0.0.0.0 -d /output/warcs --base32 -z -P 8800 --rollover-idle-time 3600 2>&1 | tee /output/log
+RUN mkdir -p /output/warcs
+
 CMD warcprox -b 0.0.0.0 -d /output/warcs --base32 -z --rollover-idle-time 3600 2>&1 | tee /output/log
 
