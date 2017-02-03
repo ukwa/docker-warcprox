@@ -7,7 +7,7 @@ RUN curl "https://bootstrap.pypa.io/get-pip.py" | python
 
 RUN apt-get install strace
 
-RUN pip install warcprox==2.0b1
+RUN pip install warcprox==2.0
 #RUN pip install git+https://github.com/internetarchive/warcprox.git@2.x
 
 EXPOSE 8000
