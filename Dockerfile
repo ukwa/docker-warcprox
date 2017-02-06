@@ -1,18 +1,16 @@
-FROM ubuntu:16.04
+FROM python:3.6-alpine
 
-RUN apt-get update && \
-    apt-get install -y gcc make build-essential python python-dev python-gdbm curl git libffi-dev libssl-dev
+MAINTAINER steranin
 
-RUN curl "https://bootstrap.pypa.io/get-pip.py" | python
+RUN apk add --update build-base libffi libffi-dev openssl openssl-dev && \
+    pip install warcprox==2.0 && \
+    apk del build-base libffi-dev openssl-dev
 
-RUN apt-get install strace
+EXPOSE 8888
 
-RUN pip install warcprox==2.0b1
-#RUN pip install git+https://github.com/internetarchive/warcprox.git@2.x
+VOLUME /output/warcs /db /ca
 
-EXPOSE 8000
-
-RUN mkdir -p /output/warcs
+#ENTRYPOINT ["warcprox", "--address", "0.0.0.0", "--port", "8888"]
 
 CMD warcprox -b 0.0.0.0 -d /output/warcs --base32 -z --rollover-idle-time 3600 2>&1 | tee /output/log
 
