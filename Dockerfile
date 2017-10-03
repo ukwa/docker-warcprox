@@ -3,10 +3,10 @@ FROM python:3.6-alpine
 MAINTAINER steranin
 
 RUN apk add --update build-base libffi libffi-dev openssl openssl-dev && \
-    pip install warcprox==2.1b1.dev87 && \
+    pip install warcprox==2.2b1.dev102 && \
     apk del build-base libffi-dev openssl-dev
 
-EXPOSE 8888
+EXPOSE 8000
 
 VOLUME /output/warcs /db /ca
 
