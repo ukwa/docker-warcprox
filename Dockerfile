@@ -3,7 +3,7 @@ FROM python:3.6-alpine
 MAINTAINER steranin
 
 RUN apk add --update build-base libffi libffi-dev openssl openssl-dev && \
-    pip install warcprox==2.1b1.dev87 && \
+    pip install git+https://github.com/internetarchive/warcprox.git && \
     apk del build-base libffi-dev openssl-dev
 
 EXPOSE 8000
