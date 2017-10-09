@@ -2,9 +2,9 @@ FROM python:3.6-alpine
 
 MAINTAINER steranin
 
-RUN apk add --update build-base libffi libffi-dev openssl openssl-dev && \
+RUN apk add --update build-base libffi libffi-dev openssl openssl-dev git && \
     pip install git+https://github.com/internetarchive/warcprox.git && \
-    apk del build-base libffi-dev openssl-dev
+    apk del build-base libffi-dev openssl-dev git
 
 EXPOSE 8000
 
