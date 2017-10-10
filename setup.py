@@ -9,11 +9,12 @@ setup(name='warcprox-plugins',
       author_email='gward@python.net',
       url='https://www.python.org/sigs/distutils-sig/',
       packages=['warcprox-plugins'],
-    install_requires=[
-        "warcprox",
-        "kafka-python"
-    ],
-    dependency_links=[
-        "git+https://github.com/internetarchive/warcprox.git#egg=warcprox"
-    ]
-     )
+      install_requires=[
+          "warcprox",
+          "kafka-python",
+          "requests"
+      ],
+      dependency_links=[
+          "git+https://github.com/internetarchive/warcprox.git#egg=warcprox"
+      ]
+      )
