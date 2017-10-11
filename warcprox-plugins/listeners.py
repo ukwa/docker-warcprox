@@ -21,6 +21,7 @@ USA.
 '''
 
 import os
+import time
 import kafka
 import datetime
 import json
@@ -100,8 +101,8 @@ class KafkaCaptureFeed:
     logger = logging.getLogger('warcprox.kafkafeed.CaptureFeed')
 
     def __init__(self):
-        self.broker_list = os.environ.get("KAFKA_BROKER_LIST","localhost:9092")
-        self.topic = os.environ.get("KAFKA_CRAWL_LOG_TOPIC", "frequent-crawl-log")
+        self.broker_list = os.environ.get("KAFKA_BROKER_LIST")
+        self.topic = os.environ.get("KAFKA_CRAWL_LOG_TOPIC")
         self.acks = int(os.environ.get("KAFKA_CRAWL_LOG_ACKS", "0"))
         self.__producer = None
         self._connection_exception = None
@@ -146,7 +147,7 @@ class UpdateOutbackCDX:
     logger = logging.getLogger('warcprox.kafkafeed.UpdateOutbackCDX')
 
     def __init__(self):
-        self.endpoint = os.environ.get("CDXSERVER_ENDPOINT","http://localhost:9090/fc")
+        self.endpoint = os.environ.get("CDXSERVER_ENDPOINT")
         self.session = requests.Session()
 
     def notify(self, recorded_url, records):
@@ -159,13 +160,13 @@ class UpdateOutbackCDX:
         cdx_11 = cdx_line(d)
 
         # POST it to the CDX server:
-        r = self.session.post(self.endpoint, data=cdx_11.encode('utf-8'))
-        if r.status_code == 200:
-            pass
-            # logger.info("POSTed to cdxserver: %s" % cdx_11)
-        else:
-            self.logger.error("Failed with %s %s\n%s" % (r.status_code, r.reason, r.text))
-            self.logger.error("Failed submission was: %s" % cdx_11.encode('utf-8'))
-            raise Exception("Failed with %s %s\n%s" % (r.status_code, r.reason, r.text))
-
-
+        sent = False
+        while not sent:
+            r = self.session.post(self.endpoint, data=cdx_11.encode('utf-8'))
+            if r.status_code == 200:
+                sent = True
+                # logger.info("POSTed to cdxserver: %s" % cdx_11)
+            else:
+                self.logger.error("Failed with %s %s\n%s" % (r.status_code, r.reason, r.text))
+                self.logger.error("Failed submission was: %s" % cdx_11.encode('utf-8'))
+                time.sleep(10)
