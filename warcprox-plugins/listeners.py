@@ -96,7 +96,7 @@ def to_json(recorded_url, records):
     return d
 
 
-class CaptureFeed:
+class KafkaCaptureFeed:
     logger = logging.getLogger('warcprox.kafkafeed.CaptureFeed')
 
     def __init__(self):
