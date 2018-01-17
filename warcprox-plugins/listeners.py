@@ -101,8 +101,6 @@ def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctool
         for (k, v) in recorded_url.warcprox_meta['capture-feed-extra-fields'].items():
             d[k] = v
 
-    print(d)
-
     return d
 
 
