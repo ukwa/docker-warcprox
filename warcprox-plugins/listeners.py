@@ -80,7 +80,7 @@ def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctool
         'status_code': recorded_url.status,
         'wire_bytes': recorded_url.size,
         'content_type': recorded_url.mimetype,
-        'content_digest': payload_digest,
+        'content_digest': payload_digest.decode("utf-8"),
         'content_length': content_length,
         'start_time_plus_duration': '{:%Y%m%d%H%M%S}{:03d}+{}'.format(
             recorded_url.timestamp, recorded_url.timestamp.microsecond // 1000,
@@ -89,7 +89,7 @@ def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctool
         'warc_filename': records[0].warc_filename,
         'warc_offset': records[0].offset,
         'warc_length': records[0].length,
-        "warc_content_type": records[0].content_type,
+        "warc_content_type": records[0].content_type.decode("utf-8"),
         "warc_type": records[0].type.decode("utf-8"),
         "warc_id": records[0].id.decode("utf-8"),
         'timestamp': '{:%Y-%m-%dT%H:%M:%S}.{:03d}Z'.format(now, now.microsecond // 1000)
@@ -101,6 +101,8 @@ def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctool
         for (k, v) in recorded_url.warcprox_meta['capture-feed-extra-fields'].items():
             d[k] = v
 
+    print(d)
+
     return d
 
 
@@ -108,8 +110,8 @@ class KafkaCaptureFeed:
     logger = logging.getLogger('warcprox-plugins.listeners.CaptureFeed')
 
     def __init__(self):
-        self.broker_list = os.environ.get("KAFKA_BOOTSTRAP_SERVERS")
-        self.topic = os.environ.get("KAFKA_CRAWLED_TOPIC")
+        self.broker_list = os.environ["KAFKA_BOOTSTRAP_SERVERS"]
+        self.topic = os.environ["KAFKA_CRAWLED_TOPIC"]
         self.acks = int(os.environ.get("KAFKA_ACKS", "0"))
         self.__producer = None
         self._connection_exception = None
@@ -156,7 +158,7 @@ class UpdateOutbackCDX:
     logger = logging.getLogger('warcprox-plugins.listeners.UpdateOutbackCDX')
 
     def __init__(self):
-        self.endpoint = os.environ.get("CDXSERVER_ENDPOINT")
+        self.endpoint = os.environ["CDXSERVER_ENDPOINT"]
         self.session = requests.Session()
 
     def notify(self, recorded_url, records):
