@@ -98,7 +98,7 @@ def to_json(recorded_url, records):
 
 
 class KafkaCaptureFeed:
-    logger = logging.getLogger('warcprox.kafkafeed.CaptureFeed')
+    logger = logging.getLogger('warcprox-plugins.listeners.CaptureFeed')
 
     def __init__(self):
         self.broker_list = os.environ.get("KAFKA_BROKER_LIST")
@@ -127,7 +127,7 @@ class KafkaCaptureFeed:
 
     def notify(self, recorded_url, records):
 
-        if records[0].type not in (b'revisit', b'response'):
+        if records[0].type not in (b'revisit', b'response', b'resource'):
             return
 
         topic = recorded_url.warcprox_meta.get('capture-feed-topic', self.topic)
@@ -144,7 +144,7 @@ class KafkaCaptureFeed:
 
 
 class UpdateOutbackCDX:
-    logger = logging.getLogger('warcprox.kafkafeed.UpdateOutbackCDX')
+    logger = logging.getLogger('warcprox-plugins.listeners.UpdateOutbackCDX')
 
     def __init__(self):
         self.endpoint = os.environ.get("CDXSERVER_ENDPOINT")
@@ -152,7 +152,7 @@ class UpdateOutbackCDX:
 
     def notify(self, recorded_url, records):
 
-        if records[0].type not in (b'revisit', b'response'):
+        if records[0].type not in (b'revisit', b'response', b'resource'):
             return
 
         # Convert the record to the right form:
