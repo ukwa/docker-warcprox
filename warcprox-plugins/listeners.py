@@ -30,6 +30,8 @@ from hanzo import warctools
 import threading
 import requests
 from io import StringIO
+import warcprox
+from typing import List
 
 
 def cdx_line(entry):
@@ -57,7 +59,7 @@ def cdx_line(entry):
     return line
 
 
-def to_json(recorded_url, records):
+def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctools.WarcRecord]):
     # {"status_code":200,"content_digest":"sha1:3VU56HI3BTMDZBL2TP7SQYXITT7VEAJQ","host":"www.kaosgl.com","via":"http://www.kaosgl.com/sayfa.php?id=4427","account_id":"877","seed":"http://www.kaosgl.com/","warc_filename":"ARCHIVEIT-6003-WEEKLY-JOB171310-20150903100014694-00002.warc.gz","url":"http://www.kaosgl.com/resim/HomofobiKarsitiBulusma/trabzon05.jpg","size":29700,"start_time_plus_duration":"20150903175709637+1049","timestamp":"2015-09-03T17:57:10.707Z","mimetype":"image/jpeg","collection_id":"6003","is_test_crawl":"false","job_name":"6003-20150902172136074","warc_offset":856320200,"thread":6,"hop_path":"RLLLLLE","extra_info":{},"annotations":"duplicate:digest","content_length":29432}
 
     try:
@@ -65,6 +67,7 @@ def to_json(recorded_url, records):
             'utf-8')  # b'WARC-Payload-Digest'
     except:
         payload_digest = '-'
+
 
     now = datetime.datetime.utcnow()
     d = {
@@ -76,10 +79,10 @@ def to_json(recorded_url, records):
         'content_digest': payload_digest,
         'warc_filename': records[0].warc_filename,
         'warc_offset': records[0].offset,
-        'warc_length': recorded_url.response_recorder.len,
+        'warc_length': records[0].length,
         'host': recorded_url.host,
         'annotations': 'duplicate:digest' if records[0].type == 'revisit' else '',
-        'content_length': recorded_url.response_recorder.len - recorded_url.response_recorder.payload_offset,
+        'content_length': recorded_url.size,
         'start_time_plus_duration': '{:%Y%m%d%H%M%S}{:03d}+{}'.format(
             recorded_url.timestamp, recorded_url.timestamp.microsecond // 1000,
             int(recorded_url.duration.total_seconds() * 1000)),
@@ -125,7 +128,7 @@ class KafkaCaptureFeed:
 
         return self.__producer
 
-    def notify(self, recorded_url, records):
+    def notify(self, recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctools.WarcRecord]):
 
         if records[0].type not in (b'revisit', b'response', b'resource'):
             return
