@@ -62,33 +62,37 @@ def cdx_line(entry):
 def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctools.WarcRecord]):
     # {"status_code":200,"content_digest":"sha1:3VU56HI3BTMDZBL2TP7SQYXITT7VEAJQ","host":"www.kaosgl.com","via":"http://www.kaosgl.com/sayfa.php?id=4427","account_id":"877","seed":"http://www.kaosgl.com/","warc_filename":"ARCHIVEIT-6003-WEEKLY-JOB171310-20150903100014694-00002.warc.gz","url":"http://www.kaosgl.com/resim/HomofobiKarsitiBulusma/trabzon05.jpg","size":29700,"start_time_plus_duration":"20150903175709637+1049","timestamp":"2015-09-03T17:57:10.707Z","mimetype":"image/jpeg","collection_id":"6003","is_test_crawl":"false","job_name":"6003-20150902172136074","warc_offset":856320200,"thread":6,"hop_path":"RLLLLLE","extra_info":{},"annotations":"duplicate:digest","content_length":29432}
 
-    try:
-        payload_digest = records[0].get_header(warctools.WarcRecord.PAYLOAD_DIGEST).decode(
-            'utf-8')  # b'WARC-Payload-Digest'
-    except:
-        payload_digest = '-'
-
+    # Normal recorded response:
+    if recorded_url.response_recorder:
+        content_length = recorded_url.response_recorder.len - recorded_url.response_recorder.payload_offset
+        payload_digest = warcprox.digest_str(
+            recorded_url.payload_digest, True)
+    else:
+        # WARCPROX_WRITE_RECORD request
+        content_length = len(recorded_url.request_data)
+        payload_digest = records[0].get_header(b'WARC-Payload-Digest')
 
     now = datetime.datetime.utcnow()
     d = {
-        'timestamp': '{:%Y-%m-%dT%H:%M:%S}.{:03d}Z'.format(now, now.microsecond // 1000),
-        'size': recorded_url.size,
-        'status_code': recorded_url.status,
         'url': recorded_url.url.decode('utf-8'),
-        'mimetype': recorded_url.mimetype,
-        'content_digest': payload_digest,
-        'warc_filename': records[0].warc_filename,
-        'warc_offset': records[0].offset,
-        'warc_length': records[0].length,
         'host': recorded_url.host,
-        'annotations': 'duplicate:digest' if records[0].type == 'revisit' else '',
-        'content_length': recorded_url.size,
+        'http_method': recorded_url.method,
+        'status_code': recorded_url.status,
+        'wire_bytes': recorded_url.size,
+        'content_type': recorded_url.mimetype,
+        'content_digest': payload_digest,
+        'content_length': content_length,
         'start_time_plus_duration': '{:%Y%m%d%H%M%S}{:03d}+{}'.format(
             recorded_url.timestamp, recorded_url.timestamp.microsecond // 1000,
             int(recorded_url.duration.total_seconds() * 1000)),
-        # 'hop_path': ?  # only used for seed redirects, which are n/a to brozzler (?)
-        # 'via': ?
-        # 'thread': ? # not needed
+        'annotations': 'duplicate:digest' if records[0].type == 'revisit' else '',
+        'warc_filename': records[0].warc_filename,
+        'warc_offset': records[0].offset,
+        'warc_length': records[0].length,
+        "warc_content_type": records[0].content_type().decode("utf-8"),
+        "warc_type": records[0].type.decode("utf-8"),
+        "warc_id": records[0].id.decode("utf-8"),
+        'timestamp': '{:%Y-%m-%dT%H:%M:%S}.{:03d}Z'.format(now, now.microsecond // 1000)
     }
 
     # fields expected to be populated here are (for archive-it):
