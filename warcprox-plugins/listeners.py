@@ -164,6 +164,8 @@ class UpdateOutbackCDX:
         if records[0].type not in (b'revisit', b'response', b'resource'):
             return
 
+        # FIXME! This pushes REVISIT records to the CDX Server with e.g. the original Content Type, not matching
+
         # Convert the record to the right form:
         d = to_json(recorded_url,records)
         cdx_11 = cdx_line(d)

@@ -4,10 +4,10 @@ from setuptools import setup, find_packages
 
 setup(name='warcprox-plugins',
       version='1.0',
-      description='Python Distribution Utilities',
-      author='Greg Ward',
-      author_email='gward@python.net',
-      url='https://www.python.org/sigs/distutils-sig/',
+      description='Extending warcprox with UKWA plugins',
+      author='Andrew Jackson',
+      author_email='andrew.jackson@bl.uk',
+      url='https://www.github.com/ukwa/docker-warcprox/',
       packages=['warcprox-plugins'],
       install_requires=[
           "warcprox",
