@@ -74,9 +74,10 @@ def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctool
 
     # Deal with variation in content type:
     content_type = recorded_url.mimetype
-    if content_type.find(" ") >= 0:
-      content_type = "application/malformed-header"
+    if content_type and content_type.find(" ") >= 0:
+        content_type = "application/malformed-header"
 
+    # Build the record:
     now = datetime.datetime.utcnow()
     d = {
         'url': recorded_url.url.decode('utf-8'),
@@ -177,7 +178,8 @@ class UpdateOutbackCDX:
 
         # POST it to the CDX server:
         sent = False
-        while not sent:
+        tries = 0
+        while not sent and tries < 5:
             r = self.session.post(self.endpoint, data=cdx_11.encode('utf-8'))
             if r.status_code == 200:
                 sent = True
@@ -185,4 +187,8 @@ class UpdateOutbackCDX:
             else:
                 self.logger.error("Failed with %s %s\n%s" % (r.status_code, r.reason, r.text))
                 self.logger.error("Failed submission was: %s" % cdx_11.encode('utf-8'))
+                tries = tries + 1
                 time.sleep(10)
+        # Warn of failure:
+        if not sent:
+            self.logger.error("Failed to send record to CDX server for %s after %i attempts." % (d, tries))
