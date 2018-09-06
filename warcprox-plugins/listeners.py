@@ -72,6 +72,11 @@ def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctool
         content_length = len(recorded_url.request_data)
         payload_digest = records[0].get_header(b'WARC-Payload-Digest')
 
+    # Deal with variation in content type:
+    content_type = recorded_url.mimetype
+    if content_type.find(" ") >= 0:
+      content_type = "application/malformed-header"
+
     now = datetime.datetime.utcnow()
     d = {
         'url': recorded_url.url.decode('utf-8'),
@@ -79,7 +84,7 @@ def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctool
         'http_method': recorded_url.method,
         'status_code': recorded_url.status,
         'wire_bytes': recorded_url.size,
-        'content_type': recorded_url.mimetype,
+        'content_type': content_type,
         'content_digest': payload_digest.decode("utf-8"),
         'content_length': content_length,
         'start_time_plus_duration': '{:%Y%m%d%H%M%S}{:03d}+{}'.format(
