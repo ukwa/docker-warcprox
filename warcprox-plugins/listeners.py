@@ -69,10 +69,7 @@ def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctool
             recorded_url.payload_digest, True)
     else:
         # WARCPROX_WRITE_RECORD request:
-        if recorded_url.request_data:
-            content_length = len(recorded_url.request_data)
-        else:
-            content_type = 0
+        content_length = recorded_url.size
         payload_digest = records[0].get_header(b'WARC-Payload-Digest')
 
     # Deal with variation in content type:
