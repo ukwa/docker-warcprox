@@ -42,7 +42,7 @@ def cdx_line(entry):
     out.write(' ')
     out.write(entry['url'])
     out.write(' ')
-    out.write(entry.get('content_type',''))
+    out.write(str(entry.get('content_type','')))
     out.write(' ')
     out.write(str(entry['status_code']))
     out.write(' ')
