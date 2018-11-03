@@ -168,6 +168,7 @@ class UpdateOutbackCDX:
     def notify(self, recorded_url, records):
 
         if records[0].type not in (b'revisit', b'response', b'resource'):
+            self.logger.debug("Not sending record of type %s to the CDX Server" % records[0].type)
             return
 
         # FIXME! This pushes REVISIT records to the CDX Server with e.g. the original Content Type, not matching
@@ -183,7 +184,7 @@ class UpdateOutbackCDX:
             r = self.session.post(self.endpoint, data=cdx_11.encode('utf-8'))
             if r.status_code == 200:
                 sent = True
-                # logger.info("POSTed to cdxserver: %s" % cdx_11)
+                self.logger.debug("POSTed to cdxserver: %s" % cdx_11)
             else:
                 self.logger.error("Failed with %s %s\n%s" % (r.status_code, r.reason, r.text))
                 self.logger.error("Failed submission was: %s" % cdx_11.encode('utf-8'))
