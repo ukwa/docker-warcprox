@@ -4,9 +4,7 @@ MAINTAINER Andrew.Jackson@bl.uk
 
 COPY . .
 
-RUN apk add --update build-base libffi libffi-dev openssl openssl-dev git && \
-    python setup.py install && \
-    apk del build-base libffi-dev openssl-dev git
+RUN python setup.py install
 
 EXPOSE 8000
 
