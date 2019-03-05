@@ -92,7 +92,7 @@ def to_json(recorded_url: warcprox.warcproxy.RecordedUrl, records: List[warctool
             recorded_url.timestamp, recorded_url.timestamp.microsecond // 1000,
             int(recorded_url.duration.total_seconds() * 1000)),
         'annotations': 'duplicate:digest' if records[0].type == 'revisit' else '',
-        'warc_filename': records[0].warc_filename,
+        'warc_filename': os.path.basename(records[0].warc_filename),
         'warc_offset': records[0].offset,
         'warc_length': records[0].length,
         "warc_content_type": records[0].content_type.decode("utf-8"),
