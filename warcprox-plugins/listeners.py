@@ -167,11 +167,15 @@ class UpdateOutbackCDX:
 
     def notify(self, recorded_url, records):
 
+        # FIXME! This pushes REVISIT records to the CDX Server with e.g. the original Content Type, not matching
         if records[0].type not in (b'revisit', b'response', b'resource'):
             self.logger.debug("Not sending record of type %s to the CDX Server" % records[0].type)
             return
 
-        # FIXME! This pushes REVISIT records to the CDX Server with e.g. the original Content Type, not matching
+        # Do not send 304 cache checks from browser rendering to OutbackCDX (?) or should OWB/PYWB skip them?
+        if recorded_url.status == 304:
+            self.logger.debug("Not sending HTTP 304 record to the CDX Server")
+            return
 
         # Convert the record to the right form:
         d = to_json(recorded_url,records)
