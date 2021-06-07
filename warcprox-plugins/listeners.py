@@ -35,6 +35,10 @@ from typing import List
 
 
 def cdx_line(entry):
+    # If the digest starts with a prefix like sha1: drop it (so OutbackCDX stores the hash correctly):
+    if ':' in entry['content_digest']:
+        entry['content_digest'] = entry['content_digest'].split(':')[1]
+    # Now assemble the CDX line:
     out = StringIO()
     out.write(entry['url'])
     out.write(' ')
@@ -155,7 +159,8 @@ class KafkaCaptureFeed:
         if p:
             p.send(topic, msg)
         else:
-            self.logger.warning("Could not find producer! Failed to send this message: " + msg)
+            self.logger.warning("Could not find producer! Failed to send this message:")
+            self.logger.warning(msg)
 
 
 class UpdateOutbackCDX:

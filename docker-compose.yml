@@ -2,8 +2,26 @@
 #
 warcprox:
   build: .
+  environment:
+    - "LC_ALL=en_US.utf8"
+    - "TMP=/tmp/warcprox"
+    - "KAFKA_BOOTSTRAP_SERVERS=kafka:9092"
+    - "KAFKA_CRAWLED_TOPIC=fc.crawled"
+    - "KAFKA_CRAWLED_ACKS=1"
+    - "CDXSERVER_ENDPOINT=http://cdxserver:8080/warcprox"
   volumes:
     - ./output/warcs:/output/warcs
+  ports:
+    - "8000:8000"
+  links:
+    - cdxserver
+
+cdxserver:
+  image: nlagovau/outbackcdx:0.10.0
+  # Verbose form logs submissions:
+  command: "java -Xmx2g -jar outbackcdx.jar -u -d /cdx-data -p 8080 -b 0.0.0.0 -t 1000"
+  ports:
+    - "9090:8080"
 
 # Squic load balancer
 # 
