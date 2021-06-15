@@ -2,7 +2,8 @@ FROM python:3.7-slim
 
 MAINTAINER Andrew.Jackson@bl.uk
 
-COPY . .
+COPY setup.py .
+COPY warcprox-plugins warcprox-plugins
 
 RUN python setup.py install
 
