@@ -1,48 +1,56 @@
-# The WARChiving proxy itself
-#
-warcprox:
-  build: .
-  environment:
-    - "LC_ALL=en_US.utf8"
-    - "TMP=/tmp/warcprox"
-    - "KAFKA_BOOTSTRAP_SERVERS=kafka:9092"
-    - "KAFKA_CRAWLED_TOPIC=fc.crawled"
-    - "KAFKA_CRAWLED_ACKS=1"
-    - "CDXSERVER_ENDPOINT=http://cdxserver:8080/warcprox"
-  volumes:
-    - ./output/warcs:/output/warcs
-  ports:
-    - "8000:8000"
-  links:
-    - cdxserver
+version: "3.7"
 
-cdxserver:
-  image: nlagovau/outbackcdx:0.10.0
-  # Verbose form logs submissions:
-  command: "java -Xmx2g -jar outbackcdx.jar -u -d /cdx-data -p 8080 -b 0.0.0.0 -t 1000"
-  ports:
-    - "9090:8080"
-
-# Squic load balancer
-# 
-# Current implementation requires manual updates to squid.conf depending on the number of warcprox instances.
-warcprox-squid:
-  image: ukwa/warcprox-squid
-  ports:
-    - "3128:3128"
-  links:
-    - warcprox
-
-# HAProxy load balancer
-#
-# An auto-scaling frontend for multiple warcprox instances working together.
-# Seem to need the httpclose option to stop the proxy from dropping 'keep alive' connections
-ha-prox:
-  image: tutum/haproxy
-  ports:
-    - "3127:80"
-  environment:
-    - BALANCE=hdr(host)
-    - OPTION=redispatch,httpclose
-  links:
-    - warcprox
+services:  
+  
+  # The WARChiving proxy itself
+  #
+  warcprox:
+    build:
+      context: .
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTPS_PROXY}
+    environment:
+      - "LC_ALL=en_US.utf8"
+      - "TMP=/tmp/warcprox"
+      - "KAFKA_BOOTSTRAP_SERVERS=kafka:9092"
+      - "KAFKA_CRAWLED_TOPIC=fc.crawled"
+      - "KAFKA_CRAWLED_ACKS=1"
+      - "CDXSERVER_ENDPOINT=http://cdxserver:8080/warcprox"
+    volumes:
+      - ./output/warcs:/output/warcs
+    ports:
+      - "8000:8000"
+    links:
+      - cdxserver
+  
+  cdxserver:
+    image: nlagovau/outbackcdx:0.10.0
+    # Verbose form logs submissions:
+    command: "java -Xmx2g -jar outbackcdx.jar -u -d /cdx-data -p 8080 -b 0.0.0.0 -t 1000"
+    ports:
+      - "8085:8080"
+  
+  # Squic load balancer
+  # 
+  # Current implementation requires manual updates to squid.conf depending on the number of warcprox instances.
+  warcprox-squid:
+    image: ukwa/warcprox-squid
+    ports:
+      - "3128:3128"
+    links:
+      - warcprox
+  
+  # HAProxy load balancer
+  #
+  # An auto-scaling frontend for multiple warcprox instances working together.
+  # Seem to need the httpclose option to stop the proxy from dropping 'keep alive' connections
+  ha-prox:
+    image: tutum/haproxy
+    ports:
+      - "3127:80"
+    environment:
+      - BALANCE=hdr(host)
+      - OPTION=redispatch,httpclose
+    links:
+      - warcprox

@@ -1,6 +1,13 @@
-FROM python:3.7-slim
+FROM python:3.10-slim
 
 MAINTAINER Andrew.Jackson@bl.uk
+
+RUN apt-get update && \
+        apt-get install -y \
+        build-essential \
+        libffi-dev \
+        && rm -rf /var/lib/apt/lists/*
+
 
 COPY setup.py .
 COPY warcprox-plugins warcprox-plugins
