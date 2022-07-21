@@ -5,6 +5,7 @@ services:
   # The WARChiving proxy itself
   #
   warcprox:
+    #image: ukwa/warcprox:2.4.17.1
     build:
       context: .
       args:
